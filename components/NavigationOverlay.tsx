@@ -1,8 +1,16 @@
 
 import React, { useState } from 'react';
 
+interface Project {
+  id: string;
+  title: string;
+  tag: string;
+  description: string;
+  images: string[];
+}
+
 // --- Project Data Structure ---
-const projectsData = [
+const projectsData: Project[] = [
   {
     id: 'asen',
     title: 'Åsen 42A, Nexø',
@@ -49,11 +57,15 @@ const projectsData = [
   }
 ];
 
+interface ProjectGalleryProps {
+  project: Project;
+}
+
 // --- Sub-Component: Dynamic Project Gallery ---
-const ProjectGallery = ({ project }) => {
+const ProjectGallery: React.FC<ProjectGalleryProps> = ({ project }) => {
   const [activeImgIndex, setActiveImgIndex] = useState(0);
 
-  const cardContainerStyle = {
+  const cardContainerStyle: React.CSSProperties = {
     width: '100%',
     maxWidth: '1000px',
     marginBottom: '80px',
@@ -62,7 +74,7 @@ const ProjectGallery = ({ project }) => {
     gap: '15px',
   };
 
-  const mainImageContainerStyle = {
+  const mainImageContainerStyle: React.CSSProperties = {
     width: '100%',
     height: '450px', // Default desktop height
     backgroundColor: '#333',
@@ -71,7 +83,7 @@ const ProjectGallery = ({ project }) => {
     border: '1px solid #444',
   };
 
-  const mainImageStyle = {
+  const mainImageStyle: React.CSSProperties = {
     width: '100%',
     height: '100%',
     backgroundImage: `url(${project.images[activeImgIndex]})`,
@@ -80,7 +92,7 @@ const ProjectGallery = ({ project }) => {
     transition: 'background-image 0.3s ease-in-out', // Smooth transition
   };
 
-  const tagStyle = {
+  const tagStyle: React.CSSProperties = {
     position: 'absolute',
     top: '10px',
     left: '10px',
@@ -92,7 +104,7 @@ const ProjectGallery = ({ project }) => {
     zIndex: 2,
   };
 
-  const thumbnailRowStyle = {
+  const thumbnailRowStyle: React.CSSProperties = {
     display: 'flex',
     gap: '10px',
     marginTop: '5px',
@@ -139,13 +151,13 @@ const ProjectGallery = ({ project }) => {
 
 
 export const NavigationOverlay = () => {
-  const [activeSection, setActiveSection] = useState(null);
+  const [activeSection, setActiveSection] = useState<'profile' | 'company' | 'projects' | null>(null);
 
   const handleClose = () => setActiveSection(null);
 
   // --- Styles ---
 
-  const overlayContainerStyle = {
+  const overlayContainerStyle: React.CSSProperties = {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -160,7 +172,7 @@ export const NavigationOverlay = () => {
     paddingBottom: '3rem',
   };
 
-  const buttonGroupStyle = {
+  const buttonGroupStyle: React.CSSProperties = {
     display: 'flex',
     gap: '4rem', // Increased for centering
     pointerEvents: 'auto',
@@ -170,7 +182,7 @@ export const NavigationOverlay = () => {
     width: '100%', // Ensure it takes full width for centering
   };
 
-  const buttonStyle = (isActive) => ({
+  const buttonStyle = (isActive: boolean): React.CSSProperties => ({
     background: isActive ? '#fff' : 'rgba(0,0,0,0.5)',
     color: isActive ? '#000' : '#fff',
     border: '2px solid #fff',
@@ -187,7 +199,7 @@ export const NavigationOverlay = () => {
   });
 
   // Styles for the Sticky Close Button
-  const floatingCloseContainerStyle = {
+  const floatingCloseContainerStyle: React.CSSProperties = {
     position: 'fixed',
     bottom: '30px',
     left: '0',
@@ -198,7 +210,7 @@ export const NavigationOverlay = () => {
     pointerEvents: 'auto',
   };
 
-  const floatingCloseButtonStyle = {
+  const floatingCloseButtonStyle: React.CSSProperties = {
     background: '#000',
     border: '2px solid #fff',
     color: '#fff',
@@ -215,7 +227,7 @@ export const NavigationOverlay = () => {
   // --- Modal Styles ---
 
   // PROFILE (Iris)
-  const profileModalStyle = {
+  const profileModalStyle: React.CSSProperties = {
     position: 'fixed',
     top: 0,
     left: 0,
@@ -235,7 +247,7 @@ export const NavigationOverlay = () => {
   };
 
   // COMPANY (Hydraulic)
-  const companyPanelStyle = (direction) => ({
+  const companyPanelStyle = (direction: 'top' | 'bottom'): React.CSSProperties => ({
     position: 'fixed',
     left: 0,
     width: '100vw',
@@ -258,7 +270,7 @@ export const NavigationOverlay = () => {
   });
 
   // PROJECTS (Slice)
-  const projectStripStyle = (index) => ({
+  const projectStripStyle = (index: number): React.CSSProperties => ({
     position: 'fixed',
     top: 0,
     width: '25vw',
@@ -273,7 +285,7 @@ export const NavigationOverlay = () => {
       : `translateY(${index % 2 === 0 ? '-100%' : '100%'})`,
   });
 
-  const projectsContentStyle = {
+  const projectsContentStyle: React.CSSProperties = {
     position: 'fixed',
     top: 0,
     left: 0,
@@ -293,7 +305,7 @@ export const NavigationOverlay = () => {
   };
 
   // Helper to render the floating close button for active sections
-  const renderFloatingClose = (label, isWhiteBackground = false) => {
+  const renderFloatingClose = (label: string, isWhiteBackground = false) => {
     if (!activeSection) return null;
     
     // Override colors if on white background
@@ -357,7 +369,6 @@ export const NavigationOverlay = () => {
             <div><strong>CONTACT</strong></div>
             <div>
               E-mail: rasmus.juuljorgensen@gmail.com<br/>
-              Mobile: 61 76 45 15
             </div>
           </div>
 

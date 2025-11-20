@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useWindowSize } from '../hooks/useWindowSize.tsx';
 import { useMousePosition } from '../hooks/useMousePosition.tsx';
@@ -78,13 +79,12 @@ export const Creature = () => {
     transform: `scale(${1 + happiness * 0.05})`,
     transition: 'transform 0.3s ease-out',
     position: 'relative',
-    // Reduced size by 50% (from 15vmin to 7.5vmin)
+    // Reduced size (7.5vmin)
     width: '7.5vmin', 
     height: '7.5vmin',
-    minWidth: '30px', // Adjusted minimum width for safety
+    minWidth: '30px',
   };
 
-  // Blink transformation
   const eyeStyle: React.CSSProperties = {
     transition: 'transform 0.1s ease-in-out',
     transformOrigin: 'center',

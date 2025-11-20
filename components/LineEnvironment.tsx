@@ -1,9 +1,10 @@
 
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
-// Verner Panton 'Geometri' / Grid Style Generator
-// A rigid grid of squares containing contrasting circles of varying sizes
+// Verner Panton 'Geometri' Style Generator
+// Grid of squares with contrasting circles
 const createPatternCanvas = () => {
   const size = 1024;
   const canvas = document.createElement('canvas');
@@ -13,7 +14,6 @@ const createPatternCanvas = () => {
 
   if (!ctx) return canvas;
 
-  // The pattern is a grid. Let's make it 8x8 for a good density.
   const gridCount = 8; 
   const tileSize = size / gridCount;
 
@@ -24,20 +24,17 @@ const createPatternCanvas = () => {
       const centerX = xPos + tileSize / 2;
       const centerY = yPos + tileSize / 2;
 
-      // 1. Determine Background Color (Checkerboard)
-      // (x + y) % 2 === 0 gives us the checkerboard pattern
+      // Checkerboard BG
       const isBlackBg = (x + y) % 2 === 0;
       
       ctx.fillStyle = isBlackBg ? '#000000' : '#ffffff';
       ctx.fillRect(xPos, yPos, tileSize, tileSize);
 
-      // 2. Draw Circle (Contrast Color)
+      // Contrast Circle
       ctx.fillStyle = isBlackBg ? '#ffffff' : '#000000';
       ctx.beginPath();
 
-      // 3. Create Rhythm: Alternate circle sizes by row
-      // Even rows have large circles (almost touching edges)
-      // Odd rows have smaller circles (creating breathing room)
+      // Alternating sizes
       let radius;
       if (y % 2 === 0) {
         radius = tileSize * 0.42; // Large
@@ -55,7 +52,6 @@ const createPatternCanvas = () => {
 
 export const LineEnvironment = () => {
   const mountRef = useRef(null);
-  // Start with 45 degrees (PI/4) so walls are clearly visible immediately
   const targetRotationY = useRef(Math.PI / 4);
 
   useEffect(() => {
@@ -63,8 +59,6 @@ export const LineEnvironment = () => {
     if (!currentMount) return;
 
     let isMounted = true;
-
-    // Prevent divide-by-zero issues if container hasn't laid out yet
     const width = currentMount.clientWidth || window.innerWidth || 1;
     const height = currentMount.clientHeight || window.innerHeight || 1;
 
@@ -76,11 +70,9 @@ export const LineEnvironment = () => {
     let renderer = null;
 
     try {
-      // Alpha: true is crucial for transparency
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(width, height);
       renderer.setPixelRatio(window.devicePixelRatio);
-      // Clear color must be transparent
       renderer.setClearColor(0x000000, 0);
       renderer.domElement.style.background = 'transparent'; 
       currentMount.appendChild(renderer.domElement);
@@ -91,53 +83,40 @@ export const LineEnvironment = () => {
 
     if (!renderer) return;
     
-    // --- Room Construction ---
+    // --- Rounded Room Construction ---
     const room = new THREE.Group();
     room.rotation.y = targetRotationY.current;
-
-    const CUBE_SIZE = 4;
 
     const wallPatternCanvas = createPatternCanvas();
     const wallTexture = new THREE.CanvasTexture(wallPatternCanvas);
     wallTexture.wrapS = THREE.RepeatWrapping;
     wallTexture.wrapT = THREE.RepeatWrapping;
-    // We repeat the texture slightly to increase density if needed, 
-    // but the canvas generator handles the density nicely now (8x8 grid).
-    wallTexture.repeat.set(1, 1); 
+    wallTexture.repeat.set(2, 2); // Denser pattern for the box
     
-    // Enable Anisotropy for sharp lines at angles
     if (renderer.capabilities.getMaxAnisotropy()) {
         wallTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
     }
 
-    // Use the same patterned material for walls, floor, and ceiling
-    const roomMaterial = new THREE.MeshBasicMaterial({ map: wallTexture, side: THREE.DoubleSide });
+    // MATERIAL: BackSide is crucial to see the "inside" of the box
+    const roomMaterial = new THREE.MeshBasicMaterial({ 
+        map: wallTexture, 
+        side: THREE.BackSide 
+    });
     
-    const planeGeom = new THREE.PlaneGeometry(CUBE_SIZE, CUBE_SIZE);
+    // GEOMETRY: RoundedBoxGeometry(width, height, depth, segments, radius)
+    // Dimensions must be equal to form a cube. 
+    // Radius gives the squircle effect.
+    const boxSize = 5;
+    const boxRadius = 1.0; 
+    const boxSegments = 8;
+    const geometry = new RoundedBoxGeometry(boxSize, boxSize, boxSize, boxSegments, boxRadius);
     
-    const leftWall = new THREE.Mesh(planeGeom, roomMaterial);
-    leftWall.position.x = -CUBE_SIZE / 2;
-    leftWall.rotation.y = Math.PI / 2;
-    room.add(leftWall);
-    
-    const rightWall = new THREE.Mesh(planeGeom, roomMaterial);
-    rightWall.position.x = CUBE_SIZE / 2;
-    rightWall.rotation.y = -Math.PI / 2;
-    room.add(rightWall);
-    
-    const floor = new THREE.Mesh(planeGeom, roomMaterial);
-    floor.position.y = -CUBE_SIZE / 2;
-    floor.rotation.x = Math.PI / 2;
-    room.add(floor);
-    
-    const ceiling = new THREE.Mesh(planeGeom, roomMaterial);
-    ceiling.position.y = CUBE_SIZE / 2;
-    ceiling.rotation.x = -Math.PI / 2;
-    room.add(ceiling);
+    const roundedRoom = new THREE.Mesh(geometry, roomMaterial);
+    room.add(roundedRoom);
 
     scene.add(room);
 
-    // --- Animation and Interaction ---
+    // --- Animation ---
     let animationFrameId;
     const animate = () => {
       if (!isMounted || !renderer) return;
@@ -145,10 +124,7 @@ export const LineEnvironment = () => {
       try {
         animationFrameId = requestAnimationFrame(animate);
         
-        // Smoothly interpolate visual rotation towards target
         room.rotation.y += (targetRotationY.current - room.rotation.y) * 0.08;
-        
-        // Decay target rotation back to 0 (The "Return to Center" force)
         targetRotationY.current *= 0.98;
 
         renderer.render(scene, camera);
@@ -199,7 +175,7 @@ export const LineEnvironment = () => {
 
       wallTexture.dispose();
       roomMaterial.dispose();
-      planeGeom.dispose();
+      geometry.dispose();
       
       if (renderer) {
         renderer.dispose();
@@ -216,9 +192,9 @@ export const LineEnvironment = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      zIndex: 2, // Explicit Z-index higher than creature
+      zIndex: 2, 
       pointerEvents: 'none',
-      backgroundColor: 'transparent', // Ensure container is transparent
+      backgroundColor: 'transparent',
   };
 
   return <div ref={mountRef} style={mountStyle} />;
