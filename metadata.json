@@ -1,0 +1,5 @@
+{
+  "name": "Back-Up of Interactive Creature",
+  "description": "A simple, interactive web application featuring a small black creature that follows your cursor and reacts to its proximity.",
+  "requestFramePermissions": []
+}

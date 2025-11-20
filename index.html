@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Creature</title>
+    
+    <!-- 1. Define process.env to prevent React/Three.js CDN crashes -->
+    <script>
+      window.global = window;
+      window.process = { env: { NODE_ENV: 'development' } };
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Babel Standalone -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 2. Clean Import Map -->
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1?dev",
+    "react/": "https://esm.sh/react@18.3.1/",
+    "react-dom": "https://esm.sh/react-dom@18.3.1?dev",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?dev",
+    "three": "https://esm.sh/three@0.164.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+    <style>
+      body { margin: 0; padding: 0; background-color: #111111; overflow: hidden; }
+      #loading {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        color: white; font-family: sans-serif; pointer-events: none; text-align: center;
+        max-width: 80%; line-height: 1.5; font-size: 1.2rem; z-index: 9999;
+      }
+    </style>
+</head>
+  <body>
+    <div id="root"></div>
+    <div id="loading">Loading app...<br><span style="font-size:0.8em; opacity:0.7">(Compiling in browser)</span></div>
+    <script>
+      if (window.location.protocol === 'file:') {
+        const el = document.getElementById('loading');
+        if (el) {
+          el.style.color = '#ff6b6b';
+          el.innerHTML = "<strong>Security Warning</strong><br>Browsers block this app when opened directly as a file.<br><br>Please run it using a local web server.<br>(e.g. VS Code 'Live Server' extension or 'python -m http.server')";
+        }
+      }
+      
+      window.onerror = function(msg, url, line) {
+        const el = document.getElementById('loading');
+        if (el) {
+          el.style.color = '#ff6b6b';
+          el.innerText = "Error: " + msg;
+        }
+      };
+    </script>
+    <!-- 3. Load index.tsx -->
+    <script type="text/babel" data-type="module" data-presets="react,typescript" src="./index.tsx"></script>
+  </body>
+</html>
